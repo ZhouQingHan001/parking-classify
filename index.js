@@ -1,12 +1,12 @@
 const MQTT = require("./mqtt/index");
 const later = require("later");
 later.date.localTime();
-const sched = { schedules: [{ h: [15], m: [00] }] };
+const sched = { schedules: [{ h: [21], m: [30] }] };
 
 const {
   TMoteStatus: { handleTMoteStatus, reportStatusCnt },
   TMoteInfo: { handleTmoteInfo, reportRadarCt },
-  WorkInfo
+  WorkInfo: { handleWorkInfo, reportNbRuntTme }
 } = require("./handler/index");
 const mqtt = new MQTT();
 
@@ -16,9 +16,12 @@ mqtt.on("TMoteStatus", data => {
 mqtt.on("TMoteInfo", data => {
   handleTmoteInfo(data);
 });
-mqtt.on("WorkInfo", data => {});
+mqtt.on("WorkInfo", data => {
+  handleWorkInfo(data);
+});
 
 let alarm = later.setInterval(async () => {
   await reportRadarCt();
   reportStatusCnt();
+  reportNbRuntTme();
 }, sched);

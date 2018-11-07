@@ -1,3 +1,4 @@
+const Parkingspaces = require("../mongo/Parkingspaces");
 const log4js = require("log4js");
 const {
   dingding_Info,
@@ -57,6 +58,7 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
   let parkinglot = await findParkinglot(SN);
   let content = "设备重启";
   if (TOPIC === "/standard/tayk/bhsh/") {
+    log4TMoteInfo.info("天奥银科的设备重启了");
     switch (BootFlag) {
       case "1":
         content = `独立看门狗重启`;
@@ -110,9 +112,7 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
       default:
         content = "莫名其妙就重启了";
     }
-    dingding_SpclReboot(
-      `天奥银科的设备[${SN}]${content}, 当前累计重启次数:${BootCount}`
-    );
+    dingding_SpclReboot(`天奥银科的设备[${SN}]${content}, Boot:${Boot}`);
     return;
   }
   if (TOPIC === "/standard/bell/bell_test/") {
@@ -170,7 +170,7 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
         content = "莫名其妙就重启了";
     }
     dingding_SpclReboot(
-      `用户[bell_test]下的设备[${SN}]${content}, 当前累计重启次数:${BootCount}`
+      `用户[bell_test]下的设备[${SN}]${content}, Boot:${Boot}`
     );
     return;
   }
@@ -179,57 +179,57 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]独立看门狗重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]独立看门狗重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]独立看门狗重启，当前累计重启次数:${BootCount}, 检测到小无线异常,请及时查看确认。`;
+          }]下的设备[${SN}]独立看门狗重启，Boot:${Boot}, 检测到小无线异常,请及时查看确认。`;
       break;
     case "2":
       switch (Boot.substr(-1, 1)) {
         case "1":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]系统超时重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]系统超时重启，Boot:${Boot}`;
           break;
         case "2":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]小无线命令重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]小无线命令重启，Boot:${Boot}`;
           break;
         case "3":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]COAP命令重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]COAP命令重启，Boot:${Boot}`;
           break;
         case "4":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]MQTT命令重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]MQTT命令重启，Boot:${Boot}`;
           break;
         case "5":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]小无线升级重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]小无线升级重启，Boot:${Boot}`;
           break;
         case "6":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]COAP升级重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]COAP升级重启，Boot:${Boot}`;
           break;
         case "7":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]MQTT升级重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]MQTT升级重启，Boot:${Boot}`;
           break;
         case "8":
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]NB超时重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]NB超时重启，Boot:${Boot}`;
           break;
         default:
           content = `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]软件重启，当前累计重启次数:${BootCount}, 请及时查看确认`;
+          }]下的设备[${SN}]软件重启，Boot:${Boot}`;
           break;
       }
       break;
@@ -237,46 +237,46 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]电压不足重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]电压不足重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]电压不足重启，当前累计重启次数:${BootCount},未检测到小无线,请及时查看确认`;
+          }]下的设备[${SN}]电压不足重启，Boot:${Boot}未检测到小无线,请及时查看确认`;
       break;
     case "4":
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]断电重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]断电重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]断电重启，当前累计重启次数:${BootCount},未检测到小无线,请及时查看确认`;
+          }]下的设备[${SN}]断电重启，Boot:${Boot},未检测到小无线,请及时查看确认`;
       break;
     case "5":
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]选项位控制重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]选项位控制重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]选项位控制重启，当前累计重启次数:${BootCount},未检测到小无线,请及时查看确认`;
+          }]下的设备[${SN}]选项位控制重启，Boot:${Boot},未检测到小无线,请及时查看确认`;
       break;
     case "7":
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]窗口看门狗重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]窗口看门狗重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]窗口看门狗重启，当前累计重启次数:${BootCount},未检测到小无线,请及时查看确认`;
+          }]下的设备[${SN}]窗口看门狗重启，Boot:${Boot},未检测到小无线,请及时查看确认`;
       break;
     case "8":
       content = rfFlag
         ? `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]引脚控制重启，当前累计重启次数:${BootCount}, 请及时查看确认`
+          }]下的设备[${SN}]引脚控制重启，Boot:${Boot}`
         : `[${TOPIC}]车场[${
             parkinglot.ParkinglotName
-          }]下的设备[${SN}]引脚控制重启，当前累计重启次数:${BootCount},未检测到小无线,请及时查看确认`;
+          }]下的设备[${SN}]引脚控制重启，Boot:${Boot},未检测到小无线,请及时查看确认`;
       break;
     default:
       content = `[${TOPIC}]车场[${
