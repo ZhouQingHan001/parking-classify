@@ -132,10 +132,10 @@ const statusIsNormal = (sn, data, bufferData) => {
   return new Promise((resolve, reject) => {
     switch (data.Status) {
       case 0:
-        // console.log("车辆离开");
+        //  console.log("车辆离开");
         let reliability = (255 + data.RadarDiff * 2 - data.CoverCount) % 255; // < 5 为优； < 10 为良
         if (reliability > 10) {
-          // console.log("雷达背景值异常", reliability);
+          //  console.log("雷达背景值异常", reliability);
           resolve(1);
           break;
         }
@@ -160,7 +160,7 @@ const statusIsNormal = (sn, data, bufferData) => {
             break;
           }
         }
-        resolve("credible");
+        resolve(0);
         break;
       case 1:
         // console.log("车辆进入");
@@ -185,7 +185,7 @@ const statusIsNormal = (sn, data, bufferData) => {
             break;
           }
         }
-        resolve("credible");
+        resolve(0);
         break;
       case 2:
         // console.log("持续无车");
@@ -213,7 +213,7 @@ const statusIsNormal = (sn, data, bufferData) => {
           resolve(3); //这里判断的依据是 数据库统计Status=2时 magdiff<1000 率为 282920/322542
           break;
         }
-        resolve("credible");
+        resolve(0);
         break;
       case 3:
         // console.log("持续有车");
@@ -227,7 +227,7 @@ const statusIsNormal = (sn, data, bufferData) => {
         //     resolve(1);
         //     break;
         // }
-        resolve("credible");
+        resolve(0);
         break;
       default:
         reject("error");
@@ -265,38 +265,58 @@ const findParkinglot = SN => {
  * @param {*} signalQualityPoor 是否信号差
  * @param {*} statusResult 数据判断
  */
-const middleware = (packageResult, signalQualityPoor, statusResult) => {
+const middleware = (packageResult, statusResult, signalQualityPoor) => {
   let ErrorType = "normal";
   let Msg = "数据包有问题";
-  if (!packageResult && !signalQualityPoor && statusResult === "credible") {
+  if (!packageResult && !signalQualityPoor && statusResult == 0) {
     ErrorType = "normal";
     Msg = "数据正常";
-  } else if (packageResult) {
-    switch (packageResult) {
+  }
+  switch (packageResult) {
+    case 1:
+      // console.log(`状态包重复`);
+      ErrorType = "status package repeat";
+      Msg = "设备状态包重复";
+      break;
+    case 2:
+      // console.log('心跳包重复');
+      ErrorType = "heart package repeat";
+      Msg = "设备心跳包重复,";
+      break;
+    case 3:
+      // console.log('count值不连续');
+      ErrorType = "count error";
+      Msg = "数据包count值不连续";
+      break;
+    case 4:
+      // console.log('状态包延时超过1分钟');
+      ErrorType = "status Delay too long ";
+      Msg = "数据包延时很大";
+      break;
+    case 5:
+      // console.log("上报的数据XYZ值和上一包完全一样, 请及时查看确认");
+      ErrorType = "xyz same previous package";
+      Msg = "磁场XYZ值相比上一包没变化";
+      break;
+    default:
+      break;
+  }
+  if (statusResult) {
+    switch (statusResult) {
       case 1:
-        // console.log(`状态包重复`);
-        ErrorType = "status package repeat";
-        Msg = "设备状态包重复";
+        // console.log("雷达背景值异常");
+        ErrorType = "radar background unnormal";
+        Msg = "雷达背景值异常";
         break;
       case 2:
-        // console.log('心跳包重复');
-        ErrorType = "heart package repeat";
-        Msg = "设备心跳包重复,";
+        // console.log('Distance');
+        ErrorType = "radar distance unnormal";
+        Msg = "雷达Distance异常";
         break;
       case 3:
-        // console.log('count值不连续');
-        ErrorType = "count error";
-        Msg = "数据包count值不连续";
-        break;
-      case 4:
-        // console.log('状态包延时超过1分钟');
-        ErrorType = "status Delay too long ";
-        Msg = "数据包延时很大";
-        break;
-      case 5:
-        // console.log("上报的数据XYZ值和上一包完全一样, 请及时查看确认");
-        ErrorType = "xyz same previous package";
-        Msg = "磁场XYZ值相比上一包没变化";
+        console.log("磁场有问题");
+        ErrorType = "magDiff unnormal";
+        Msg = "磁感数据异常";
         break;
       default:
         break;
@@ -304,26 +324,6 @@ const middleware = (packageResult, signalQualityPoor, statusResult) => {
   } else if (signalQualityPoor) {
     ErrorType = "signal Quality Poor";
     Msg = "设备信号质量很差";
-  } else {
-    switch (statusResult) {
-      case 1:
-        // console.log('雷达背景值异常');
-        Errortype = "radar background unnormal";
-        Msg = "雷达背景值异常";
-        break;
-      case 2:
-        // console.log('Distance');
-        Errortype = "radar distance unnormal";
-        Msg = "雷达Distance异常";
-        break;
-      case 3:
-        // console.log('磁场有问题');
-        Errortype = "magDiff unnormal";
-        Msg = "磁感数据异常";
-        break;
-      default:
-        break;
-    }
   }
   return { ErrorType, Msg };
 };
@@ -345,8 +345,8 @@ const handleTMoteStatus = async data => {
     });
   } else {
     let ret1 = await judgePackage(SN, TMoteStatus, result);
-    let ret2 = await signalQuality(TMoteStatus);
-    let ret3 = await statusIsNormal(SN, TMoteStatus, result);
+    let ret2 = await statusIsNormal(SN, TMoteStatus, result);
+    let ret3 = await signalQuality(TMoteStatus);
     let parkinglot = await findParkinglot(SN);
     result.TMoteStatus = TMoteStatus;
     result.Time = new Date(); //更新buffer
