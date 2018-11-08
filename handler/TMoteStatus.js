@@ -351,6 +351,13 @@ const handleTMoteStatus = async data => {
     result.TMoteStatus = TMoteStatus;
     result.Time = new Date(); //更新buffer
     if (TOPIC === "/standard/johnlee/panxh/cyt/" && ret1 == 6) {
+      await mongoAgent(
+        SN,
+        "radar value unnormal",
+        TOPIC,
+        TMoteStatus,
+        parkinglot
+      );
       let content = `车易停${
         parkinglot.ParkinglotName
       }下的设备[${SN}],雷达疑似有问题，请及时查看确认`;
