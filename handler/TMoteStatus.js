@@ -66,14 +66,16 @@ const judgePackage = (sn, data, bufferData) => {
     let passTime = new Date().getTime() - bufferData.Time.getTime();
     let BufferTMoteStatus = bufferData.TMoteStatus;
     let repeatResult = compare(BufferTMoteStatus, data);
-    if (
+    if (BufferTMoteStatus.RadarVal == data.RadarVal) {
+      resolve(6);
+    } else if (
       data.Status < 2 &&
       BufferTMoteStatus.x == data.x &&
       BufferTMoteStatus.y == data.y &&
       BufferTMoteStatus.z == data.z &&
       BufferTMoteStatus.Status != data.Status
     ) {
-      console.log("越石要我加的xyz一样");
+      // console.log("越石要我加的xyz一样");
       resolve(5);
     } else if (repeatResult && data.Status < 2) {
       //状态包重复
@@ -348,6 +350,12 @@ const handleTMoteStatus = async data => {
     let parkinglot = await findParkinglot(SN);
     result.TMoteStatus = TMoteStatus;
     result.Time = new Date(); //更新buffer
+    if (TOPIC === "/standard/johnlee/panxh/cyt/" && ret1 == 6) {
+      let content = `车易停${
+        parkinglot.ParkinglotName
+      }下的设备[${SN}],雷达疑似有问题，请及时查看确认`;
+      dingding_status(content);
+    }
     const { ErrorType, Msg } = middleware(ret1, ret2, ret3);
     if (ErrorType != "normal") {
       await mongoAgent(SN, ErrorType, TOPIC, TMoteStatus, parkinglot);
@@ -403,7 +411,9 @@ const reportStatusCnt = () => {
     xyzSamePrevious;
   let content = `TMoteStatus统计 \r\n上报TMoteStatus数据包总数:${statusTotalCount}条 \r\n异常TMoteStatus数据包总数:${sum}条\r\n异常TMoteStatus数据包占比：${(
     sum / statusTotalCount
-  ).toFixed(2)}\r\n 雷达距离异常：${radarDistanceCt}\r\n雷达背景异常：${radarBackgroundCt}\r\n信号质量很差：${signalQualityPoorCt}\r\n数据延时很大：${DelayTooLongCt}\r\n重复数据上报：${heartPackageRepeat +
+  ).toFixed(
+    2
+  )}\r\n 雷达距离异常：${radarDistanceCt}\r\n雷达背景异常：${radarBackgroundCt}\r\n信号质量很差：${signalQualityPoorCt}\r\n数据延时很大：${DelayTooLongCt}\r\n重复数据上报：${heartPackageRepeat +
     statusPackageRepeat}\r\n磁感数据异常：${magDiffUnnormal}\r\ncount不连续：${countError}\r\n 磁感XYZ无变化：${xyzSamePrevious}`;
   dingding_status(content);
 };
