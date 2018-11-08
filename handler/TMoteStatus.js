@@ -66,7 +66,7 @@ const judgePackage = (sn, data, bufferData) => {
     let passTime = new Date().getTime() - bufferData.Time.getTime();
     let BufferTMoteStatus = bufferData.TMoteStatus;
     let repeatResult = compare(BufferTMoteStatus, data);
-    if (BufferTMoteStatus.RadarVal == data.RadarVal) {
+    if (BufferTMoteStatus.RadarVal == data.RadarVal && !repeatResult) {
       resolve(6);
     } else if (
       data.Status < 2 &&
