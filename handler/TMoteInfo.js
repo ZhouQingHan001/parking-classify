@@ -54,7 +54,7 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
   const { Hard, Boot } = TMoteInfo;
   let rfFlag = Hard.indexOf("RF") > 0 || Hard.indexOf("rf") > 0;
   let BootFlag = Boot.substr(0, 1);
-  let BootCount = Boot.substr(2, 10);
+  let softRebootflag = Boot.match(/[.]/g).length; //如果有两个.说明要对软件重启分类
   let parkinglot = await findParkinglot(SN);
   let content = "设备重启";
   if (TOPIC === "/standard/tayk/bhsh/") {
@@ -64,34 +64,38 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
         content = `独立看门狗重启`;
         break;
       case "2":
-        switch (Boot.substr(-1, 1)) {
-          case "1":
-            content = `系统超时重启`;
-            break;
-          case "2":
-            content = `小无线命令重启`;
-            break;
-          case "3":
-            content = `COAP命令重启`;
-            break;
-          case "4":
-            content = `MQTT命令重启`;
-            break;
-          case "5":
-            content = `小无线升级重启`;
-            break;
-          case "6":
-            content = `COAP升级重启`;
-            break;
-          case "7":
-            content = `MQTT升级重启`;
-            break;
-          case "8":
-            content = `NB超时重启`;
-            break;
-          default:
-            content = `软件重启`;
-            break;
+        if (softRebootflag === 2) {
+          switch (Boot.substr(-1, 1)) {
+            case "1":
+              content = `系统超时重启`;
+              break;
+            case "2":
+              content = `小无线命令重启`;
+              break;
+            case "3":
+              content = `COAP命令重启`;
+              break;
+            case "4":
+              content = `MQTT命令重启`;
+              break;
+            case "5":
+              content = `小无线升级重启`;
+              break;
+            case "6":
+              content = `COAP升级重启`;
+              break;
+            case "7":
+              content = `MQTT升级重启`;
+              break;
+            case "8":
+              content = `NB超时重启`;
+              break;
+            default:
+              content = `软件重启`;
+              break;
+          }
+        } else {
+          content = `软件重启`;
         }
         break;
       case "3":
@@ -121,34 +125,38 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
         content = `独立看门狗重启`;
         break;
       case "2":
-        switch (Boot.substr(-1, 1)) {
-          case "1":
-            content = `系统超时重启`;
-            break;
-          case "2":
-            content = `小无线命令重启`;
-            break;
-          case "3":
-            content = `COAP命令重启`;
-            break;
-          case "4":
-            content = `MQTT命令重启`;
-            break;
-          case "5":
-            content = `小无线升级重启`;
-            break;
-          case "6":
-            content = `COAP升级重启`;
-            break;
-          case "7":
-            content = `MQTT升级重启`;
-            break;
-          case "8":
-            content = `NB超时重启`;
-            break;
-          default:
-            content = `软件重启`;
-            break;
+        if (softRebootflag === 2) {
+          switch (Boot.substr(-1, 1)) {
+            case "1":
+              content = `系统超时重启`;
+              break;
+            case "2":
+              content = `小无线命令重启`;
+              break;
+            case "3":
+              content = `COAP命令重启`;
+              break;
+            case "4":
+              content = `MQTT命令重启`;
+              break;
+            case "5":
+              content = `小无线升级重启`;
+              break;
+            case "6":
+              content = `COAP升级重启`;
+              break;
+            case "7":
+              content = `MQTT升级重启`;
+              break;
+            case "8":
+              content = `NB超时重启`;
+              break;
+            default:
+              content = `软件重启`;
+              break;
+          }
+        } else {
+          content = `软件重启`;
         }
         break;
       case "3":
@@ -185,53 +193,60 @@ const reBoot = async (SN, TOPIC, TMoteInfo) => {
           }]下的设备[${SN}]独立看门狗重启，Boot:${Boot}, 检测到小无线异常,请及时查看确认。`;
       break;
     case "2":
-      switch (Boot.substr(-1, 1)) {
-        case "1":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]系统超时重启，Boot:${Boot}`;
-          break;
-        case "2":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]小无线命令重启，Boot:${Boot}`;
-          break;
-        case "3":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]COAP命令重启，Boot:${Boot}`;
-          break;
-        case "4":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]MQTT命令重启，Boot:${Boot}`;
-          break;
-        case "5":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]小无线升级重启，Boot:${Boot}`;
-          break;
-        case "6":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]COAP升级重启，Boot:${Boot}`;
-          break;
-        case "7":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]MQTT升级重启，Boot:${Boot}`;
-          break;
-        case "8":
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]NB超时重启，Boot:${Boot}`;
-          break;
-        default:
-          content = `[${TOPIC}]车场[${
-            parkinglot.ParkinglotName
-          }]下的设备[${SN}]软件重启，Boot:${Boot}`;
-          break;
+      if (softRebootflag === 2) {
+        switch (Boot.substr(-1, 1)) {
+          case "1":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]系统超时重启，Boot:${Boot}`;
+            break;
+          case "2":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]小无线命令重启，Boot:${Boot}`;
+            break;
+          case "3":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]COAP命令重启，Boot:${Boot}`;
+            break;
+          case "4":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]MQTT命令重启，Boot:${Boot}`;
+            break;
+          case "5":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]小无线升级重启，Boot:${Boot}`;
+            break;
+          case "6":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]COAP升级重启，Boot:${Boot}`;
+            break;
+          case "7":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]MQTT升级重启，Boot:${Boot}`;
+            break;
+          case "8":
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]NB超时重启，Boot:${Boot}`;
+            break;
+          default:
+            content = `[${TOPIC}]车场[${
+              parkinglot.ParkinglotName
+            }]下的设备[${SN}]软件重启，Boot:${Boot}`;
+            break;
+        }
+      } else {
+        content = `[${TOPIC}]车场[${
+          parkinglot.ParkinglotName
+        }]下的设备[${SN}]软件重启，Boot:${Boot}`;
       }
+
       break;
     case "3":
       content = rfFlag
