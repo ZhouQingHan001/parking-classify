@@ -44,6 +44,7 @@ const allValueLt5 = RadarVal => {
   for (let i = 0; i < temp.length; i++) {
     if (temp[i] > 5) return false;
   }
+  if (RadarVal.match(/[0]/g).length === 16) return false;
   return true;
 };
 
