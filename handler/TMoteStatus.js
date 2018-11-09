@@ -39,6 +39,14 @@ const compare = (obj1, obj2) => {
   return true;
 };
 
+const allValueLt5 = RadarVal => {
+  let temp = RadarVal.split(",");
+  for (let i = 0; i < temp.length; i++) {
+    if (temp[i] > 5) return false;
+  }
+  return true;
+};
+
 const mongoAgent = async (SN, ErrorType, TOPIC, TMoteStatus, parkinglot) => {
   let ret = await MoteDevicesWrongHistory.create({
     SN: SN,
@@ -66,7 +74,7 @@ const judgePackage = (sn, data, bufferData) => {
     let passTime = new Date().getTime() - bufferData.Time.getTime();
     let BufferTMoteStatus = bufferData.TMoteStatus;
     let repeatResult = compare(BufferTMoteStatus, data);
-    if (BufferTMoteStatus.RadarVal == data.RadarVal && !repeatResult) {
+    if (allValueLt5(data.RadarVal)) {
       resolve(6);
     } else if (
       data.Status < 2 &&
@@ -347,10 +355,10 @@ const handleTMoteStatus = async data => {
     let ret1 = await judgePackage(SN, TMoteStatus, result);
     let ret2 = await statusIsNormal(SN, TMoteStatus, result);
     let ret3 = await signalQuality(TMoteStatus);
-    let parkinglot = await findParkinglot(SN);
+    let parkinglot = (await findParkinglot(SN)) || { ParkinglotName: "" };
     result.TMoteStatus = TMoteStatus;
     result.Time = new Date(); //更新buffer
-    if (TOPIC === "/standard/johnlee/panxh/cyt/" && ret1 == 6) {
+    if (ret1 == 6) {
       await mongoAgent(
         SN,
         "radar value unnormal",
@@ -358,9 +366,9 @@ const handleTMoteStatus = async data => {
         TMoteStatus,
         parkinglot
       );
-      let content = `车易停${
+      let content = `${
         parkinglot.ParkinglotName
-      }下的设备[${SN}],雷达疑似有问题，请及时查看确认`;
+      }(${TOPIC})下的设备[${SN}],雷达值全部小于5，请及时查看确认`;
       dingding_status(content);
     }
     const { ErrorType, Msg } = middleware(ret1, ret2, ret3);
@@ -424,6 +432,7 @@ const reportStatusCnt = () => {
     statusPackageRepeat}\r\n磁感数据异常：${magDiffUnnormal}\r\ncount不连续：${countError}\r\n 磁感XYZ无变化：${xyzSamePrevious}`;
   dingding_status(content);
 };
+
 module.exports = {
   handleTMoteStatus,
   reportStatusCnt
