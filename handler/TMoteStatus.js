@@ -42,9 +42,9 @@ const compare = (obj1, obj2) => {
 const allValueLt5 = RadarVal => {
   let temp = RadarVal.split(",");
   for (let i = 0; i < temp.length; i++) {
-    if (temp[i] > 5) return false;
+    if (temp[i] >= 5) return false;
   }
-  if (RadarVal.match(/[0]/g).length === 16) return false;
+  if (RadarVal.match(/[0]/g).length === temp.length) return false;
   return true;
 };
 
